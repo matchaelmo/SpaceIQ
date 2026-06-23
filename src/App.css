@@ -201,3 +201,238 @@ button, input { font: inherit; }
   .metrics-strip, .four-up, .steps-grid, .team-grid, .footer-links { grid-template-columns: 1fr; }
   .pricing-band, .footer-brand, .footer-bottom { flex-direction: column; align-items: flex-start; }
 }
+
+.planning-strip {
+  position: relative;
+  z-index: 2;
+  margin-top: -38px;
+  display: grid;
+  grid-template-columns: 0.82fr 1.18fr;
+  gap: 22px;
+  align-items: center;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 30px;
+  background: rgba(255,255,255,0.94);
+  box-shadow: 0 28px 70px rgba(15, 36, 70, 0.12);
+  backdrop-filter: blur(18px);
+}
+
+.planning-strip h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(1.9rem, 3.4vw, 3.4rem);
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+
+.planning-strip .eyebrow { color: #0f5ad8; }
+
+.planning-items {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.planning-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 84px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: linear-gradient(180deg, #fff, #f6f9ff);
+}
+
+.planning-item span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: 14px;
+  color: white;
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  box-shadow: 0 12px 26px rgba(47,128,255,0.2);
+}
+
+.planning-item h3 { margin: 0; color: var(--ink); letter-spacing: -0.03em; }
+
+.upload-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 96px clamp(18px, 4vw, 32px) 0;
+}
+
+.section-subtitle {
+  margin: 18px auto 0;
+  max-width: 680px;
+  color: var(--muted);
+  font-size: 1.04rem;
+  line-height: 1.7;
+}
+
+.upload-workflow {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(340px, 1.05fr);
+  gap: 22px;
+  margin-top: 34px;
+}
+
+.dropzone,
+.file-panel,
+.analysis-results {
+  border: 1px solid var(--line);
+  border-radius: 30px;
+  background: rgba(255,255,255,0.9);
+  box-shadow: 0 24px 64px rgba(15,36,70,0.09);
+}
+
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 420px;
+  padding: 34px;
+  text-align: center;
+  border-style: dashed;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(47,128,255,0.12), transparent 42%),
+    rgba(255,255,255,0.92);
+}
+
+.dropzone-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 74px;
+  height: 74px;
+  border-radius: 24px;
+  color: white;
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  box-shadow: 0 22px 44px rgba(47,128,255,0.24);
+  font-size: 2rem;
+  font-weight: 900;
+}
+
+.dropzone h3,
+.file-panel h3,
+.results-heading h3 {
+  margin: 22px 0 10px;
+  color: var(--ink);
+  font-size: clamp(1.35rem, 2.4vw, 2rem);
+  letter-spacing: -0.045em;
+}
+
+.dropzone p,
+.empty-file-state p,
+.pdf-preview p,
+.results-heading p {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.dropzone input { display: none; }
+
+.light-button {
+  margin-top: 18px;
+  color: var(--ink);
+  border-color: var(--line);
+  background: #fff;
+  box-shadow: 0 14px 28px rgba(15,36,70,0.08);
+}
+
+.file-error {
+  margin: 16px 0 0;
+  color: #b42318;
+  font-weight: 700;
+}
+
+.file-panel { padding: 26px; }
+.panel-label { margin: 0; color: #0f5ad8; font-size: 0.78rem; font-weight: 900; letter-spacing: 0.16em; text-transform: uppercase; }
+.empty-file-state,
+.pdf-preview {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 292px;
+  margin-top: 18px;
+  padding: 28px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #f8fbff, #eef5ff);
+  border: 1px solid var(--line);
+}
+
+.empty-file-state span,
+.pdf-preview span {
+  display: inline-flex;
+  width: fit-content;
+  margin-bottom: 14px;
+  border-radius: 999px;
+  padding: 8px 12px;
+  color: #0f5ad8;
+  background: #eaf3ff;
+  font-weight: 900;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+}
+
+.pdf-preview strong { color: var(--ink); font-size: 1.2rem; overflow-wrap: anywhere; }
+.image-preview {
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  margin-top: 16px;
+  border-radius: 24px;
+  border: 1px solid var(--line);
+  background: #f8fbff;
+}
+
+.analyze-button { width: 100%; margin-top: 18px; border: 0; cursor: pointer; }
+.analyze-button:disabled { cursor: wait; opacity: 0.78; }
+.analysis-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 22px;
+  padding: 18px;
+  border-radius: 22px;
+  color: #0f5ad8;
+  background: #edf6ff;
+  font-weight: 850;
+}
+.analysis-loading span {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  border: 3px solid rgba(15,90,216,0.22);
+  border-top-color: #0f5ad8;
+  animation: spin 900ms linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.analysis-results { margin-top: 28px; padding: 28px; }
+.results-heading { max-width: 760px; }
+.results-heading h3 { margin-top: 0; }
+.results-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-top: 24px; }
+.result-card { border: 1px solid var(--line); border-radius: 24px; padding: 22px; background: linear-gradient(180deg, #fff, #f7fbff); }
+.result-card h4 { margin: 0 0 16px; color: var(--ink); letter-spacing: -0.035em; }
+.result-card ul { display: grid; gap: 10px; padding: 0; margin: 0; list-style: none; }
+.result-card li { position: relative; padding-left: 20px; color: var(--muted); line-height: 1.45; }
+.result-card li::before { content: ''; position: absolute; left: 0; top: 0.62em; width: 8px; height: 8px; border-radius: 99px; background: linear-gradient(135deg, var(--blue), var(--purple)); }
+
+@media (max-width: 1060px) {
+  .planning-strip,
+  .upload-workflow { grid-template-columns: 1fr; }
+  .results-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 720px) {
+  .planning-items,
+  .results-grid { grid-template-columns: 1fr; }
+  .dropzone { min-height: 340px; }
+}
