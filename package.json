@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "homepage": "https://YOUR_GITHUB_USERNAME.github.io/SpaceIQ/",
+  "homepage": "https://matchaelmo.github.io/SpaceIQ/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
