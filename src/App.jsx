@@ -43,7 +43,7 @@ export default function App() {
           <h2>Turn floor plans into intelligent workplaces.</h2>
           <p className="subtitle">
             Upload a floor plan, detect rooms and hallways, plan office assets, generate wayfinding maps,
-            and manage relocation projects.
+            and managing relocations.
           </p>
           <div className="hero-actions" id="upload">
             <a className="button button-primary" href="#upload-panel">Upload Floor Plan</a>
