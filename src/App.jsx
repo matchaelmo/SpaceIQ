@@ -1,5 +1,28 @@
 import { useEffect, useRef, useState } from 'react';
 
+
+const loadPdfJs = () => new Promise((resolve, reject) => {
+  if (window.pdfjsLib) {
+    resolve(window.pdfjsLib);
+    return;
+  }
+
+  const existingScript = document.querySelector('script[data-pdfjs="true"]');
+  if (existingScript) {
+    existingScript.addEventListener('load', () => resolve(window.pdfjsLib));
+    existingScript.addEventListener('error', () => reject(new Error('Unable to load PDF.js.')));
+    return;
+  }
+
+  const script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+  script.async = true;
+  script.dataset.pdfjs = 'true';
+  script.onload = () => resolve(window.pdfjsLib);
+  script.onerror = () => reject(new Error('Unable to load PDF.js.'));
+  document.body.appendChild(script);
+});
+
 const features = [
   {
     title: 'Room Detection',
@@ -196,21 +219,75 @@ function LandingPage({ onGetStarted }) {
 function UploadPage({ onBack, onContinue }) {
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
+  const [analysisImageBase64, setAnalysisImageBase64] = useState('');
+  const [analysisMediaType, setAnalysisMediaType] = useState('image/png');
   const [analysisResult, setAnalysisResult] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState('');
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    if (!file || !file.type.startsWith('image/')) {
+    let isCancelled = false;
+    let objectUrl = '';
+
+    const preparePreview = async () => {
       setPreviewUrl('');
-      return undefined;
-    }
+      setAnalysisImageBase64('');
+      setAnalysisMediaType('image/png');
 
-    const nextPreviewUrl = URL.createObjectURL(file);
-    setPreviewUrl(nextPreviewUrl);
+      if (!file) return;
 
-    return () => URL.revokeObjectURL(nextPreviewUrl);
+      const fileIsPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+
+      if (file.type.startsWith('image/')) {
+        objectUrl = URL.createObjectURL(file);
+        const base64Image = await readFileAsBase64(file);
+
+        if (!isCancelled) {
+          setPreviewUrl(objectUrl);
+          setAnalysisImageBase64(base64Image);
+          setAnalysisMediaType(file.type || 'image/png');
+        }
+        return;
+      }
+
+      if (fileIsPdf) {
+        try {
+          const pdfjsLib = await loadPdfJs();
+          pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+          const pdfData = await file.arrayBuffer();
+          const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+          const page = await pdf.getPage(1);
+          const viewport = page.getViewport({ scale: 1.6 });
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+
+          await page.render({ canvasContext: context, viewport }).promise;
+          const dataUrl = canvas.toDataURL('image/png');
+          const base64Png = dataUrl.split(',')[1];
+
+          if (!isCancelled) {
+            setPreviewUrl(dataUrl);
+            setAnalysisImageBase64(base64Png);
+            setAnalysisMediaType('image/png');
+          }
+        } catch (pdfError) {
+          if (!isCancelled) {
+            setError(pdfError.message || 'Unable to render the first PDF page.');
+          }
+        }
+      }
+    };
+
+    preparePreview();
+
+    return () => {
+      isCancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
   }, [file]);
 
   const handleFile = (nextFile) => {
@@ -244,8 +321,8 @@ function UploadPage({ onBack, onContinue }) {
   const analyzeFloorPlan = async () => {
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      setError('AI image analysis currently supports PNG, JPG, and JPEG files. PDF preview support is available, but PDF AI analysis is not enabled yet.');
+    if (!analysisImageBase64) {
+      setError('Preparing floor plan preview. Please try again in a moment.');
       return;
     }
 
@@ -259,7 +336,7 @@ function UploadPage({ onBack, onContinue }) {
     setError('');
 
     try {
-      const base64Image = await readFileAsBase64(file);
+      const base64Image = analysisImageBase64;
       const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
@@ -278,7 +355,7 @@ function UploadPage({ onBack, onContinue }) {
                   type: 'image',
                   source: {
                     type: 'base64',
-                    media_type: file.type || 'image/png',
+                    media_type: analysisMediaType,
                     data: base64Image
                   }
                 },
