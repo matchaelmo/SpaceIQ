@@ -434,74 +434,18 @@ function UploadPage({ onBack, onContinue, workspaceInfo }) {
     return JSON.parse(trimmed);
   };
 
-  const analyzeFloorPlan = async () => {
+  const analyzeFloorPlan = () => {
     if (!file) return;
 
-    if (!analysisImageBase64) {
-      setError('Preparing floor plan preview. Please try again in a moment.');
-      return;
-    }
-
-    if (!import.meta.env.VITE_ANTHROPIC_API_KEY) {
-      setError('API key not configured.');
-      return;
-    }
-
-    setIsAnalyzing(true);
     setError('');
-
-    try {
-      const base64Image = analysisImageBase64;
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'anthropic-version': '2023-06-01',
-          'x-api-key': import.meta.env.VITE_ANTHROPIC_API_KEY
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 1000,
-          messages: [
-            {
-              role: 'user',
-              content: [
-                {
-                  type: 'image',
-                  source: {
-                    type: 'base64',
-                    media_type: analysisMediaType,
-                    data: base64Image
-                  }
-                },
-                {
-                  type: 'text',
-                  text: `Analyze this floor plan image using this workspace context: organization name: ${workspaceInfo.organizationName || 'Not provided'}; space type: ${workspaceInfo.spaceType || 'Not provided'}; total staff: ${workspaceInfo.totalStaffCount || 'Not provided'}; offices needed: ${workspaceInfo.privateOfficesNeeded || 'Not provided'}; cubicles needed: ${workspaceInfo.cubiclesNeeded || 'Not provided'}; open seats needed: ${workspaceInfo.openWorkspaceSeatsNeeded || 'Not provided'}; departments and headcounts: ${workspaceInfo.departments.map((department) => `${department.name || 'Unnamed'} (${department.headcount || 0})`).join(', ') || 'Not provided'}; special rooms needed: ${workspaceInfo.specialRoomsNeeded.join(', ') || 'None'}; move date: ${workspaceInfo.moveDate || 'Not provided'}. Return only a JSON object with these fields: confidence (high, medium, or low), confidence_note (string), rooms (array of objects with id, label, type, color, notes), and summary (string). Include recommendations about whether rooms fit the right number of people and which departments should go where. Do not include markdown or commentary.`
-                }
-              ]
-            }
-          ]
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`Anthropic API request failed with status ${response.status}.`);
-      }
-
-      const payload = await response.json();
-      const text = payload.content?.find((block) => block.type === 'text')?.text || '';
-      const parsed = parseClaudeJson(text);
-      setAnalysisResult({
-        confidence: parsed.confidence || 'medium',
-        confidence_note: parsed.confidence_note || '',
-        rooms: Array.isArray(parsed.rooms) ? parsed.rooms : [],
-        summary: parsed.summary || ''
-      });
-    } catch (nextError) {
-      setError(nextError.message || 'Unable to analyze the floor plan.');
-    } finally {
-      setIsAnalyzing(false);
-    }
+    setIsAnalyzing(false);
+    setAnalysisResult({
+      confidence: 'low',
+      confidence_note: 'AI analysis coming soon',
+      rooms: [],
+      summary: 'Floor plan uploaded. AI room detection will appear here once configured.',
+      message: 'AI analysis will be available once API is configured. Your floor plan has been uploaded successfully.'
+    });
   };
 
   const updateRoom = (roomId, field, value) => {
@@ -634,6 +578,9 @@ function UploadPage({ onBack, onContinue, workspaceInfo }) {
           ) : (
             <div>
               <h2 style={{ letterSpacing: '-0.05em', margin: '14px 0 8px' }}>Detected rooms</h2>
+              {analysisResult.message && (
+                <p style={{ background: 'var(--soft)', border: '1px solid var(--line)', borderRadius: '14px', color: 'var(--ink)', fontWeight: 800, lineHeight: 1.6, padding: '12px' }}>{analysisResult.message}</p>
+              )}
               <p style={{ color: 'var(--muted)', lineHeight: 1.6, margin: '0 0 14px' }}><strong>Confidence:</strong> {analysisResult.confidence} — {analysisResult.confidence_note}</p>
               <p style={{ color: 'var(--muted)', lineHeight: 1.6 }}>{analysisResult.summary}</p>
               <div style={{ display: 'grid', gap: '12px', marginTop: '18px' }}>
