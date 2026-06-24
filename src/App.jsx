@@ -23,6 +23,25 @@ const loadPdfJs = () => new Promise((resolve, reject) => {
   document.body.appendChild(script);
 });
 
+const initialWorkspaceInfo = {
+  organizationName: '',
+  spaceType: 'Office',
+  totalSquareFootage: '',
+  numberOfFloors: '',
+  totalStaffCount: '',
+  privateOfficesNeeded: '',
+  cubiclesNeeded: '',
+  openWorkspaceSeatsNeeded: '',
+  staffType: 'Permanent',
+  moveDate: '',
+  currentLocation: '',
+  newLocation: '',
+  budgetRange: '',
+  specialRoomsNeeded: [],
+  numberOfConferenceRooms: '',
+  departments: [{ name: '', headcount: '' }]
+};
+
 const features = [
   {
     title: 'Room Detection',
@@ -216,7 +235,104 @@ function LandingPage({ onGetStarted }) {
   );
 }
 
-function UploadPage({ onBack, onContinue }) {
+
+function WorkspaceInfoPage({ workspaceInfo, setWorkspaceInfo, onBack, onContinue }) {
+  const specialRooms = ['Server Room', 'Reception', 'Storage', 'Break Room', 'Conference Rooms', 'Phone Booths'];
+
+  const updateField = (field, value) => {
+    setWorkspaceInfo((current) => ({ ...current, [field]: value }));
+  };
+
+  const toggleSpecialRoom = (room) => {
+    setWorkspaceInfo((current) => {
+      const currentRooms = current.specialRoomsNeeded || [];
+      const nextRooms = currentRooms.includes(room)
+        ? currentRooms.filter((item) => item !== room)
+        : [...currentRooms, room];
+      return { ...current, specialRoomsNeeded: nextRooms };
+    });
+  };
+
+  const updateDepartment = (index, field, value) => {
+    setWorkspaceInfo((current) => ({
+      ...current,
+      departments: current.departments.map((department, departmentIndex) => (
+        departmentIndex === index ? { ...department, [field]: value } : department
+      ))
+    }));
+  };
+
+  const addDepartment = () => {
+    setWorkspaceInfo((current) => ({
+      ...current,
+      departments: [...current.departments, { name: '', headcount: '' }]
+    }));
+  };
+
+  const inputStyle = { border: '1px solid var(--line)', borderRadius: '14px', padding: '12px 14px', width: '100%' };
+  const labelStyle = { color: 'var(--muted)', display: 'grid', fontWeight: 800, gap: '8px' };
+
+  return (
+    <main style={{ background: 'var(--soft)', color: 'var(--ink)', minHeight: '100vh', padding: '32px clamp(18px, 4vw, 64px)' }}>
+      <section style={{ background: 'white', border: '1px solid var(--line)', borderRadius: '30px', boxShadow: '0 24px 64px rgba(15, 36, 70, 0.09)', margin: '0 auto', maxWidth: '1080px', padding: '28px' }}>
+        <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: '26px' }}>
+          <button type="button" onClick={onBack} style={{ background: 'transparent', border: '1px solid var(--line)', borderRadius: '999px', cursor: 'pointer', fontWeight: 850, minHeight: '42px', padding: '0 16px' }}>← Back</button>
+          <Logo />
+          <button type="button" onClick={onContinue} style={{ background: 'linear-gradient(135deg, var(--blue), var(--purple))', border: 0, borderRadius: '999px', color: 'white', cursor: 'pointer', fontWeight: 900, minHeight: '42px', padding: '0 18px' }}>Continue</button>
+        </div>
+
+        <p style={{ color: 'var(--blue)', fontWeight: 900, letterSpacing: '0.16em', margin: 0, textTransform: 'uppercase' }}>Workspace Info</p>
+        <h1 style={{ fontSize: 'clamp(2rem, 5vw, 4.5rem)', letterSpacing: '-0.06em', lineHeight: 1, margin: '12px 0 28px' }}>Tell SpaceIQ what you are planning</h1>
+
+        <div style={{ display: 'grid', gap: '18px', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+          <label style={labelStyle}>Organization name<input style={inputStyle} value={workspaceInfo.organizationName} onChange={(event) => updateField('organizationName', event.target.value)} /></label>
+          <label style={labelStyle}>Type of space<select style={inputStyle} value={workspaceInfo.spaceType} onChange={(event) => updateField('spaceType', event.target.value)}>{['Office', 'School', 'Clinic', 'Warehouse', 'Other'].map((type) => <option key={type}>{type}</option>)}</select></label>
+          <label style={labelStyle}>Total square footage<input style={inputStyle} type="number" value={workspaceInfo.totalSquareFootage} onChange={(event) => updateField('totalSquareFootage', event.target.value)} /></label>
+          <label style={labelStyle}>Number of floors<input style={inputStyle} type="number" value={workspaceInfo.numberOfFloors} onChange={(event) => updateField('numberOfFloors', event.target.value)} /></label>
+          <label style={labelStyle}>Total staff count<input style={inputStyle} type="number" value={workspaceInfo.totalStaffCount} onChange={(event) => updateField('totalStaffCount', event.target.value)} /></label>
+          <label style={labelStyle}>Private offices needed<input style={inputStyle} type="number" value={workspaceInfo.privateOfficesNeeded} onChange={(event) => updateField('privateOfficesNeeded', event.target.value)} /></label>
+          <label style={labelStyle}>Cubicles needed<input style={inputStyle} type="number" value={workspaceInfo.cubiclesNeeded} onChange={(event) => updateField('cubiclesNeeded', event.target.value)} /></label>
+          <label style={labelStyle}>Open workspace seats needed<input style={inputStyle} type="number" value={workspaceInfo.openWorkspaceSeatsNeeded} onChange={(event) => updateField('openWorkspaceSeatsNeeded', event.target.value)} /></label>
+          <label style={labelStyle}>Staff type<select style={inputStyle} value={workspaceInfo.staffType} onChange={(event) => updateField('staffType', event.target.value)}>{['Permanent', 'Seasonal', 'Mixed'].map((type) => <option key={type}>{type}</option>)}</select></label>
+          <label style={labelStyle}>Move date<input style={inputStyle} type="date" value={workspaceInfo.moveDate} onChange={(event) => updateField('moveDate', event.target.value)} /></label>
+          <label style={labelStyle}>Current location<input style={inputStyle} value={workspaceInfo.currentLocation} onChange={(event) => updateField('currentLocation', event.target.value)} /></label>
+          <label style={labelStyle}>New location<input style={inputStyle} value={workspaceInfo.newLocation} onChange={(event) => updateField('newLocation', event.target.value)} /></label>
+          <label style={labelStyle}>Budget range (optional)<input style={inputStyle} value={workspaceInfo.budgetRange} onChange={(event) => updateField('budgetRange', event.target.value)} /></label>
+        </div>
+
+        <div style={{ marginTop: '28px' }}>
+          <h2>Special rooms needed</h2>
+          <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
+            {specialRooms.map((room) => (
+              <label key={room} style={{ alignItems: 'center', border: '1px solid var(--line)', borderRadius: '14px', display: 'flex', gap: '10px', padding: '12px' }}>
+                <input type="checkbox" checked={workspaceInfo.specialRoomsNeeded.includes(room)} onChange={() => toggleSpecialRoom(room)} />
+                {room}
+              </label>
+            ))}
+          </div>
+          {workspaceInfo.specialRoomsNeeded.includes('Conference Rooms') && (
+            <label style={{ ...labelStyle, marginTop: '16px', maxWidth: '280px' }}>Number of conference rooms<input style={inputStyle} type="number" value={workspaceInfo.numberOfConferenceRooms} onChange={(event) => updateField('numberOfConferenceRooms', event.target.value)} /></label>
+          )}
+        </div>
+
+        <div style={{ marginTop: '28px' }}>
+          <h2>Departments</h2>
+          <div style={{ display: 'grid', gap: '12px' }}>
+            {workspaceInfo.departments.map((department, index) => (
+              <div key={index} style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'minmax(0, 1fr) 160px' }}>
+                <input style={inputStyle} placeholder="Department name" value={department.name} onChange={(event) => updateDepartment(index, 'name', event.target.value)} />
+                <input style={inputStyle} placeholder="Headcount" type="number" value={department.headcount} onChange={(event) => updateDepartment(index, 'headcount', event.target.value)} />
+              </div>
+            ))}
+          </div>
+          <button type="button" onClick={addDepartment} style={{ background: 'white', border: '1px solid var(--blue)', borderRadius: '999px', color: 'var(--blue)', cursor: 'pointer', fontWeight: 900, marginTop: '14px', minHeight: '42px', padding: '0 16px' }}>Add Department</button>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function UploadPage({ onBack, onContinue, workspaceInfo }) {
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
   const [analysisImageBase64, setAnalysisImageBase64] = useState('');
@@ -360,7 +476,7 @@ function UploadPage({ onBack, onContinue }) {
                 },
                 {
                   type: 'text',
-                  text: 'Analyze this floor plan image. Return only a JSON object with these fields: confidence (high, medium, or low), confidence_note (string), rooms (array of objects with id, label, type, color, notes), and summary (string). Do not include markdown or commentary.'
+                  text: `Analyze this floor plan image using this workspace context: organization name: ${workspaceInfo.organizationName || 'Not provided'}; space type: ${workspaceInfo.spaceType || 'Not provided'}; total staff: ${workspaceInfo.totalStaffCount || 'Not provided'}; offices needed: ${workspaceInfo.privateOfficesNeeded || 'Not provided'}; cubicles needed: ${workspaceInfo.cubiclesNeeded || 'Not provided'}; open seats needed: ${workspaceInfo.openWorkspaceSeatsNeeded || 'Not provided'}; departments and headcounts: ${workspaceInfo.departments.map((department) => `${department.name || 'Unnamed'} (${department.headcount || 0})`).join(', ') || 'Not provided'}; special rooms needed: ${workspaceInfo.specialRoomsNeeded.join(', ') || 'None'}; move date: ${workspaceInfo.moveDate || 'Not provided'}. Return only a JSON object with these fields: confidence (high, medium, or low), confidence_note (string), rooms (array of objects with id, label, type, color, notes), and summary (string). Include recommendations about whether rooms fit the right number of people and which departments should go where. Do not include markdown or commentary.`
                 }
               ]
             }
@@ -542,7 +658,7 @@ function UploadPage({ onBack, onContinue }) {
   );
 }
 
-function DashboardPage({ floorData, onBack, onProject }) {
+function DashboardPage({ floorData, workspaceInfo, onBack, onProject }) {
   const [viewMode, setViewMode] = useState('split');
   const showFloorPlan = viewMode === 'split' || viewMode === 'floor';
   const showAnalysis = viewMode === 'split' || viewMode === 'analysis';
@@ -672,27 +788,136 @@ function DashboardPage({ floorData, onBack, onProject }) {
   );
 }
 
-function ProjectPage() {
-  return <h1>ProjectPage</h1>;
+function TaskModal({ task, onClose, onSave }) {
+  const [draft, setDraft] = useState(task);
+  const [collaboratorName, setCollaboratorName] = useState('');
+  const [commentText, setCommentText] = useState('');
+  const fileInputRef = useRef(null);
+
+  const updateDraft = (field, value) => setDraft((current) => ({ ...current, [field]: value }));
+  const addCollaborator = () => {
+    if (!collaboratorName.trim()) return;
+    updateDraft('collaborators', [...draft.collaborators, collaboratorName.trim()]);
+    setCollaboratorName('');
+  };
+  const removeCollaborator = (name) => updateDraft('collaborators', draft.collaborators.filter((collaborator) => collaborator !== name));
+  const attachFile = (file) => {
+    if (!file) return;
+    updateDraft('files', [...draft.files, { name: file.name, size: file.size }]);
+  };
+  const postComment = () => {
+    if (!commentText.trim()) return;
+    updateDraft('comments', [...draft.comments, { author: 'You', text: commentText.trim(), timestamp: new Date().toLocaleString() }]);
+    setCommentText('');
+  };
+
+  const inputStyle = { border: '1px solid var(--line)', borderRadius: '12px', padding: '10px 12px', width: '100%' };
+  const labelStyle = { color: 'var(--muted)', display: 'grid', fontWeight: 800, gap: '8px' };
+
+  return (
+    <div style={{ background: 'rgba(8,17,31,0.42)', inset: 0, position: 'fixed', zIndex: 100 }}>
+      <aside style={{ background: 'white', boxShadow: '-30px 0 80px rgba(0,0,0,0.24)', height: '100%', marginLeft: 'auto', maxWidth: '560px', overflow: 'auto', padding: '24px', width: 'min(560px, 100%)' }}>
+        <div style={{ alignItems: 'center', display: 'flex', gap: '12px', justifyContent: 'space-between' }}>
+          <input value={draft.name} onChange={(event) => updateDraft('name', event.target.value)} placeholder="Task name" style={{ ...inputStyle, fontSize: '1.5rem', fontWeight: 900 }} />
+          <button type="button" onClick={onClose} style={{ background: 'transparent', border: '1px solid var(--line)', borderRadius: '999px', cursor: 'pointer', fontWeight: 900, height: '42px', width: '42px' }}>×</button>
+        </div>
+
+        <div style={{ display: 'grid', gap: '14px', gridTemplateColumns: 'repeat(2, 1fr)', marginTop: '20px' }}>
+          <label style={labelStyle}>Status<select style={inputStyle} value={draft.status} onChange={(event) => updateDraft('status', event.target.value)}>{['Not Started', 'In Progress', 'Complete', 'Blocked'].map((status) => <option key={status}>{status}</option>)}</select></label>
+          <label style={labelStyle}>Priority<select style={inputStyle} value={draft.priority} onChange={(event) => updateDraft('priority', event.target.value)}>{['Low', 'Medium', 'High', 'Critical'].map((priority) => <option key={priority}>{priority}</option>)}</select></label>
+          <label style={labelStyle}>Liaison name<input style={inputStyle} value={draft.liaison} onChange={(event) => updateDraft('liaison', event.target.value)} /></label>
+          <label style={labelStyle}>Due date<input style={inputStyle} type="date" value={draft.dueDate} onChange={(event) => updateDraft('dueDate', event.target.value)} /></label>
+        </div>
+        <label style={{ ...labelStyle, marginTop: '14px' }}>Purpose<textarea style={inputStyle} rows="4" value={draft.purpose} onChange={(event) => updateDraft('purpose', event.target.value)} /></label>
+        <label style={{ ...labelStyle, marginTop: '14px' }}>Timeline notes<textarea style={inputStyle} rows="4" value={draft.timelineNotes} onChange={(event) => updateDraft('timelineNotes', event.target.value)} /></label>
+
+        <section style={{ marginTop: '20px' }}>
+          <h3>Collaborators</h3>
+          <div style={{ display: 'flex', gap: '8px' }}><input style={inputStyle} value={collaboratorName} onChange={(event) => setCollaboratorName(event.target.value)} placeholder="Name" /><button type="button" onClick={addCollaborator} style={{ borderRadius: '999px', border: '1px solid var(--blue)', background: 'white', color: 'var(--blue)', fontWeight: 900, padding: '0 14px' }}>Add</button></div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>{draft.collaborators.map((name) => <span key={name} style={{ background: 'var(--soft)', border: '1px solid var(--line)', borderRadius: '999px', padding: '8px 10px' }}>{name} <button type="button" onClick={() => removeCollaborator(name)} style={{ border: 0, background: 'transparent', cursor: 'pointer' }}>×</button></span>)}</div>
+        </section>
+
+        <section style={{ marginTop: '20px' }}>
+          <h3>Files</h3>
+          <input ref={fileInputRef} type="file" style={{ display: 'none' }} onChange={(event) => attachFile(event.target.files?.[0])} />
+          <button type="button" onClick={() => fileInputRef.current?.click()} style={{ background: 'var(--ink)', border: 0, borderRadius: '999px', color: 'white', cursor: 'pointer', fontWeight: 900, minHeight: '40px', padding: '0 16px' }}>Attach File</button>
+          {draft.files.map((file) => <p key={`${file.name}-${file.size}`} style={{ color: 'var(--muted)' }}>{file.name} ({Math.round(file.size / 1024)} KB)</p>)}
+        </section>
+
+        <section style={{ marginTop: '20px' }}>
+          <h3>Comments</h3>
+          <div style={{ display: 'grid', gap: '10px' }}>{draft.comments.map((comment) => <article key={`${comment.timestamp}-${comment.text}`} style={{ background: 'var(--soft)', borderRadius: '14px', padding: '12px' }}><strong>{comment.author}</strong><span style={{ color: 'var(--muted)' }}> · {comment.timestamp}</span><p>{comment.text}</p></article>)}</div>
+          <textarea style={{ ...inputStyle, marginTop: '10px' }} rows="3" value={commentText} onChange={(event) => setCommentText(event.target.value)} placeholder="Write a comment" />
+          <button type="button" onClick={postComment} style={{ background: 'white', border: '1px solid var(--blue)', borderRadius: '999px', color: 'var(--blue)', cursor: 'pointer', fontWeight: 900, marginTop: '8px', minHeight: '40px', padding: '0 16px' }}>Post Comment</button>
+        </section>
+
+        <button type="button" onClick={() => onSave(draft)} style={{ background: 'linear-gradient(135deg, var(--blue), var(--purple))', border: 0, borderRadius: '999px', color: 'white', cursor: 'pointer', fontWeight: 900, marginTop: '22px', minHeight: '48px', width: '100%' }}>Save Task</button>
+      </aside>
+    </div>
+  );
+}
+
+function ProjectPage({ onBack }) {
+  const [tasks, setTasks] = useState([]);
+  const [filter, setFilter] = useState('All');
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
+
+  const createEmptyTask = () => {
+    const nextTask = { id: `task-${Date.now()}`, name: '', liaison: '', priority: 'Medium', dueDate: '', status: 'Not Started', purpose: '', timelineNotes: '', collaborators: [], files: [], comments: [] };
+    setTasks((current) => [...current, nextTask]);
+    setSelectedTaskId(nextTask.id);
+  };
+  const saveTask = (updatedTask) => {
+    setTasks((current) => current.map((task) => (task.id === updatedTask.id ? updatedTask : task)));
+    setSelectedTaskId(null);
+  };
+  const filteredTasks = filter === 'All' ? tasks : tasks.filter((task) => task.status === filter);
+  const selectedTask = tasks.find((task) => task.id === selectedTaskId);
+
+  return (
+    <main style={{ background: 'var(--soft)', color: 'var(--ink)', minHeight: '100vh' }}>
+      <header style={{ alignItems: 'center', background: 'linear-gradient(135deg, #050812 0%, var(--ink) 58%, #101d3a 100%)', color: 'white', display: 'flex', justifyContent: 'space-between', padding: '16px clamp(18px, 4vw, 56px)' }}>
+        <Logo />
+        <div style={{ display: 'flex', gap: '10px' }}><button type="button" onClick={onBack} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.16)', borderRadius: '999px', color: 'white', cursor: 'pointer', fontWeight: 850, minHeight: '42px', padding: '0 16px' }}>Back</button><button type="button" style={{ background: 'linear-gradient(135deg, #ffffff, #b9edff 42%, #8fb5ff)', border: 0, borderRadius: '999px', color: '#03101f', fontWeight: 900, minHeight: '42px', padding: '0 16px' }}>Split View</button></div>
+      </header>
+      <section style={{ margin: '0 auto', maxWidth: '1180px', padding: '28px clamp(18px, 4vw, 32px)' }}>
+        <div style={{ alignItems: 'center', display: 'flex', gap: '12px', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>{['All', 'Not Started', 'In Progress', 'Complete', 'Blocked'].map((status) => <button key={status} type="button" onClick={() => setFilter(status)} style={{ background: filter === status ? 'var(--ink)' : 'white', border: '1px solid var(--line)', borderRadius: '999px', color: filter === status ? 'white' : 'var(--ink)', cursor: 'pointer', fontWeight: 850, minHeight: '40px', padding: '0 14px' }}>{status}</button>)}</div>
+          <button type="button" onClick={createEmptyTask} style={{ background: 'linear-gradient(135deg, var(--blue), var(--purple))', border: 0, borderRadius: '999px', color: 'white', cursor: 'pointer', fontWeight: 900, minHeight: '42px', padding: '0 16px' }}>Add Task</button>
+        </div>
+        <div style={{ background: 'white', border: '1px solid var(--line)', borderRadius: '24px', marginTop: '18px', overflow: 'hidden' }}>
+          <div style={{ background: 'var(--soft)', color: 'var(--muted)', display: 'grid', fontWeight: 900, gridTemplateColumns: '1.5fr 1fr 0.8fr 0.8fr 0.9fr', padding: '14px' }}><span>Task Name</span><span>Liaison</span><span>Priority</span><span>Due Date</span><span>Status</span></div>
+          {filteredTasks.map((task) => <button key={task.id} type="button" onClick={() => setSelectedTaskId(task.id)} style={{ background: 'white', border: 0, borderTop: '1px solid var(--line)', cursor: 'pointer', display: 'grid', gridTemplateColumns: '1.5fr 1fr 0.8fr 0.8fr 0.9fr', padding: '14px', textAlign: 'left', width: '100%' }}><span>{task.name || 'Untitled task'}</span><span>{task.liaison || '—'}</span><span>{task.priority}</span><span>{task.dueDate || '—'}</span><span>{task.status}</span></button>)}
+          {filteredTasks.length === 0 && <p style={{ color: 'var(--muted)', margin: 0, padding: '28px', textAlign: 'center' }}>No tasks yet. Click Add Task to create one.</p>}
+        </div>
+      </section>
+      {selectedTask && <TaskModal task={selectedTask} onClose={() => setSelectedTaskId(null)} onSave={saveTask} />}
+    </main>
+  );
 }
 
 function App() {
   const [page, setPage] = useState('landing');
   const [floorData, setFloorData] = useState(null);
+  const [workspaceInfo, setWorkspaceInfo] = useState(initialWorkspaceInfo);
+
+  if (page === 'workspace-info') {
+    return <WorkspaceInfoPage workspaceInfo={workspaceInfo} setWorkspaceInfo={setWorkspaceInfo} onBack={() => setPage('landing')} onContinue={() => setPage('upload')} />;
+  }
 
   if (page === 'upload') {
-    return <UploadPage onBack={() => setPage('landing')} onContinue={(nextFloorData) => { setFloorData({ ...nextFloorData, isPdf: nextFloorData.file?.type === 'application/pdf' || nextFloorData.file?.name.toLowerCase().endsWith('.pdf') }); setPage('dashboard'); }} />;
+    return <UploadPage workspaceInfo={workspaceInfo} onBack={() => setPage('workspace-info')} onContinue={(nextFloorData) => { setFloorData({ ...nextFloorData, isPdf: nextFloorData.file?.type === 'application/pdf' || nextFloorData.file?.name.toLowerCase().endsWith('.pdf') }); setPage('dashboard'); }} />;
   }
 
   if (page === 'dashboard') {
-    return <DashboardPage floorData={floorData} onBack={() => setPage('upload')} onProject={() => setPage('project')} />;
+    return <DashboardPage floorData={floorData} workspaceInfo={workspaceInfo} onBack={() => setPage('upload')} onProject={() => setPage('project')} />;
   }
 
   if (page === 'project') {
-    return <ProjectPage />;
+    return <ProjectPage onBack={() => setPage('dashboard')} />;
   }
 
-  return <LandingPage onGetStarted={() => setPage('upload')} />;
+  return <LandingPage onGetStarted={() => setPage('workspace-info')} />;
 }
 
 export default App;
