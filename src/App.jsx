@@ -466,8 +466,134 @@ function UploadPage({ onBack, onContinue }) {
   );
 }
 
-function DashboardPage({ dashboardData }) {
-  return <h1>DashboardPage{dashboardData?.file ? `: ${dashboardData.file.name}` : ''}</h1>;
+function DashboardPage({ floorData, onBack, onProject }) {
+  const [viewMode, setViewMode] = useState('split');
+  const showFloorPlan = viewMode === 'split' || viewMode === 'floor';
+  const showAnalysis = viewMode === 'split' || viewMode === 'analysis';
+  const rooms = floorData?.analysisResult?.rooms || [];
+
+  return (
+    <main style={{ background: 'var(--soft)', color: 'var(--ink)', minHeight: '100vh' }}>
+      <header
+        style={{
+          alignItems: 'center',
+          background: 'linear-gradient(135deg, #050812 0%, var(--ink) 58%, #101d3a 100%)',
+          color: 'white',
+          display: 'grid',
+          gap: '18px',
+          gridTemplateColumns: '1fr auto 1fr',
+          padding: '16px clamp(18px, 4vw, 56px)'
+        }}
+      >
+        <div style={{ justifySelf: 'start' }}>
+          <Logo />
+        </div>
+
+        <div style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '999px', display: 'flex', gap: '8px', padding: '6px' }}>
+          {[
+            ['floor', 'Floor Plan Only'],
+            ['split', 'Split View'],
+            ['analysis', 'Analysis Only']
+          ].map(([mode, label]) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => setViewMode(mode)}
+              style={{
+                background: viewMode === mode ? 'linear-gradient(135deg, #ffffff, #b9edff 42%, #8fb5ff)' : 'transparent',
+                border: 0,
+                borderRadius: '999px',
+                color: viewMode === mode ? '#03101f' : 'rgba(255,255,255,0.78)',
+                cursor: 'pointer',
+                fontWeight: 850,
+                minHeight: '38px',
+                padding: '0 14px'
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', gap: '10px', justifySelf: 'end' }}>
+          <button type="button" onClick={onBack} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.16)', borderRadius: '999px', color: 'white', cursor: 'pointer', fontWeight: 850, minHeight: '42px', padding: '0 16px' }}>
+            Back
+          </button>
+          <button type="button" onClick={onProject} style={{ background: 'linear-gradient(135deg, var(--blue), var(--purple))', border: 0, borderRadius: '999px', color: 'white', cursor: 'pointer', fontWeight: 850, minHeight: '42px', padding: '0 16px' }}>
+            Project Management
+          </button>
+        </div>
+      </header>
+
+      <section
+        style={{
+          display: 'grid',
+          gridTemplateColumns: showFloorPlan && showAnalysis ? 'minmax(0, 1.35fr) minmax(340px, 0.65fr)' : '1fr',
+          minHeight: 'calc(100vh - 74px)'
+        }}
+      >
+        {showFloorPlan && (
+          <div style={{ background: '#07101f', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+            <div style={{ alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', color: 'white', display: 'flex', gap: '14px', justifyContent: 'space-between', padding: '14px 18px' }}>
+              <strong style={{ overflowWrap: 'anywhere' }}>{floorData?.file?.name || 'Floor Plan'}</strong>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {['Zoom In', 'Zoom Out', 'Fit View', '2D'].map((control) => (
+                  <button key={control} type="button" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '999px', color: 'rgba(255,255,255,0.8)', cursor: 'pointer', fontWeight: 800, minHeight: '36px', padding: '0 12px' }}>
+                    {control}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div
+              style={{
+                alignItems: 'center',
+                background:
+                  'linear-gradient(rgba(94,231,255,0.055) 1px, transparent 1px), linear-gradient(90deg, rgba(94,231,255,0.055) 1px, transparent 1px), #07101f',
+                backgroundSize: '34px 34px',
+                display: 'flex',
+                flex: 1,
+                justifyContent: 'center',
+                padding: '24px'
+              }}
+            >
+              {floorData?.previewUrl ? (
+                <img src={floorData.previewUrl} alt={`Uploaded floor plan preview for ${floorData.file?.name || 'floor plan'}`} style={{ height: '100%', maxHeight: 'calc(100vh - 170px)', maxWidth: '100%', objectFit: 'contain' }} />
+              ) : floorData?.isPdf ? (
+                <div style={{ background: 'white', borderRadius: '26px', boxShadow: '0 30px 80px rgba(0,0,0,0.34)', maxWidth: '520px', padding: '34px', textAlign: 'center', width: '100%' }}>
+                  <strong style={{ color: 'var(--blue)', display: 'block', fontSize: '1rem', letterSpacing: '0.18em', marginBottom: '14px' }}>PDF</strong>
+                  <h2 style={{ letterSpacing: '-0.05em', margin: 0 }}>{floorData.file?.name || 'Uploaded PDF'}</h2>
+                  <p style={{ color: 'var(--muted)', lineHeight: 1.6 }}>PDF floor plan preview placeholder.</p>
+                </div>
+              ) : (
+                <div style={{ color: 'rgba(255,255,255,0.7)', fontWeight: 800 }}>No floor plan selected.</div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {showAnalysis && (
+          <aside style={{ background: 'white', borderLeft: showFloorPlan ? '1px solid var(--line)' : 0, overflow: 'auto', padding: '28px' }}>
+            <p style={{ color: 'var(--blue)', fontWeight: 900, letterSpacing: '0.16em', margin: 0, textTransform: 'uppercase' }}>AI Analysis</p>
+            <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)', letterSpacing: '-0.06em', lineHeight: 1, margin: '14px 0 10px' }}>Detected spaces</h1>
+            <p style={{ color: 'var(--muted)', lineHeight: 1.65, margin: '0 0 18px' }}>
+              <strong>Confidence:</strong> {floorData?.analysisResult?.confidence || 'N/A'}
+            </p>
+            <p style={{ color: 'var(--muted)', lineHeight: 1.65, margin: '0 0 24px' }}>{floorData?.analysisResult?.summary || 'No analysis summary available yet.'}</p>
+            <div style={{ display: 'grid', gap: '12px' }}>
+              {rooms.length > 0 ? rooms.map((room) => (
+                <article key={room.id} style={{ border: '1px solid var(--line)', borderRadius: '18px', padding: '16px' }}>
+                  <h3 style={{ letterSpacing: '-0.035em', margin: '0 0 6px' }}>{room.label}</h3>
+                  <p style={{ color: 'var(--muted)', fontWeight: 800, margin: 0 }}>{room.type}</p>
+                </article>
+              )) : (
+                <p style={{ color: 'var(--muted)', lineHeight: 1.65 }}>No detected rooms to display yet.</p>
+              )}
+            </div>
+          </aside>
+        )}
+      </section>
+    </main>
+  );
 }
 
 function ProjectPage() {
@@ -476,14 +602,14 @@ function ProjectPage() {
 
 function App() {
   const [page, setPage] = useState('landing');
-  const [dashboardData, setDashboardData] = useState(null);
+  const [floorData, setFloorData] = useState(null);
 
   if (page === 'upload') {
-    return <UploadPage onBack={() => setPage('landing')} onContinue={(nextDashboardData) => { setDashboardData(nextDashboardData); setPage('dashboard'); }} />;
+    return <UploadPage onBack={() => setPage('landing')} onContinue={(nextFloorData) => { setFloorData({ ...nextFloorData, isPdf: nextFloorData.file?.type === 'application/pdf' || nextFloorData.file?.name.toLowerCase().endsWith('.pdf') }); setPage('dashboard'); }} />;
   }
 
   if (page === 'dashboard') {
-    return <DashboardPage dashboardData={dashboardData} />;
+    return <DashboardPage floorData={floorData} onBack={() => setPage('upload')} onProject={() => setPage('project')} />;
   }
 
   if (page === 'project') {
