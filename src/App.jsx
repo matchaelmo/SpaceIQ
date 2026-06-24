@@ -326,9 +326,8 @@ function UploadPage({ onBack, onContinue }) {
       return;
     }
 
-    const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
-    if (!apiKey) {
-      setError('Missing VITE_ANTHROPIC_API_KEY. Add an Anthropic API key to run live AI analysis.');
+    if (!import.meta.env.VITE_ANTHROPIC_API_KEY) {
+      setError('API key not configured.');
       return;
     }
 
@@ -342,7 +341,7 @@ function UploadPage({ onBack, onContinue }) {
         headers: {
           'Content-Type': 'application/json',
           'anthropic-version': '2023-06-01',
-          'x-api-key': apiKey
+          'x-api-key': import.meta.env.VITE_ANTHROPIC_API_KEY
         },
         body: JSON.stringify({
           model: 'claude-sonnet-4-6',
